@@ -9,8 +9,8 @@
 
     body {
       font-family: 'Montserrat', Arial, sans-serif;
-      background-color: #121212; /* fond noir très sombre */
-      color: #e0e0e0; /* texte clair */
+      background-color: #121212;
+      color: #e0e0e0;
       margin: 0;
       padding: 40px 20px;
       min-height: 100vh;
@@ -20,7 +20,7 @@
     }
 
     form {
-      background: #1e1e1e; /* gris très foncé */
+      background: #1e1e1e;
       padding: 30px 40px;
       border-radius: 15px;
       max-width: 700px;
@@ -49,7 +49,7 @@
       font-size: 1rem;
     }
 
-    input[type="number"], textarea, select {
+    input[type="text"], input[type="number"], textarea {
       width: 100%;
       padding: 12px 15px;
       border-radius: 12px;
@@ -63,13 +63,13 @@
       box-sizing: border-box;
     }
 
+    input[type="text"]::placeholder,
     input[type="number"]::placeholder,
-    textarea::placeholder,
-    select::placeholder {
+    textarea::placeholder {
       color: #7a7a7a;
     }
 
-    input[type="number"]:focus, textarea:focus, select:focus {
+    input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
       border-color: #56ccf2;
       outline: none;
       box-shadow: 0 0 8px rgba(86, 204, 242, 0.7);
@@ -122,6 +122,8 @@
 
   <script>
     const questions = [
+      { type: "text", label: "Pseudo Discord :", name: "discord_pseudo", placeholder: "Ex: MonPseudo#1234", required: true },
+      { type: "text", label: "Nom du joueur dans le jeu :", name: "jeu_pseudo", placeholder: "Ton pseudo Minecraft / Pixelmon", required: true },
       { type: "number", label: "Âge :", name: "age", min: 10, max: 100, placeholder: "Ton âge", required: true },
       { type: "textarea", label: "Quelle est ta disponibilité (jours/horaires) ?", name: "disponibilite", placeholder: "Ex : Tous les soirs à partir de 18h", required: true },
       { type: "textarea", label: "Pourquoi veux-tu rejoindre notre ville ?", name: "q0", required: true },
@@ -160,6 +162,10 @@
         if (q.min !== undefined) input.min = q.min;
         if (q.max !== undefined) input.max = q.max;
         input.placeholder = q.placeholder || "";
+      } else if (q.type === "text") {
+        input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = q.placeholder || "";
       }
       input.name = q.name;
       if (q.required) input.required = true;
@@ -175,6 +181,7 @@
       const date = now.toLocaleDateString("fr-FR");
       const time = now.toLocaleTimeString("fr-FR");
 
+      // Construire le message complet pour la candidature
       let content = `**Nouvelle candidature Pixelmon**\nEnvoyée le **${date} à ${time}**\n\n`;
 
       questions.forEach((q) => {
@@ -182,23 +189,43 @@
         content += `> **${q.label}**\n\`\`\`\n${answer}\n\`\`\`\n`;
       });
 
-      const webhookURL = "https://discord.com/api/webhooks/1378452987617214514/j3Y6bkCZEkWWRaFFo91DSrNiG6ufRaCbHRajY5zSmkR6F--HPrbZoc6E_0wZ0RaJ7YKl";
+      // Récupérer pseudo discord et pseudo jeu pour l'historique
+      const discordPseudo = form.get("discord_pseudo") || "Inconnu";
+      const jeuPseudo = form.get("jeu_pseudo") || "Inconnu";
+
+      // Message historique court
+      const historiqueContent = `**Nouvelle candidature reçue**\n> Pseudo Discord : **${discordPseudo}**\n> Pseudo en jeu : **${jeuPseudo}**\n> Date : ${date} à ${time}`;
+
+      // Tes URLs webhook ici (remplace par les tiennes)
+      const webhookCandidature = "https://discord.com/api/webhooks/1378452987617214514/j3Y6bkCZEkWWRaFFo91DSrNiG6ufRaCbHRajY5zSmkR6F--HPrbZoc6E_0wZ0RaJ7YKl";
+      const webhookHistorique = "https://discord.com/api/webhooks/1378466946365915146/ydgN4WMc3o6lbK4-p7ZsaXpSL6zME0QUmZllW31EATbjdCDFhWWHRNGSOVm_2-2ruMLn";
 
       const resultElem = document.getElementById("result");
+
       try {
-        const response = await fetch(webhookURL, {
+        // Envoi candidature complète
+        let res1 = await fetch(webhookCandidature, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content }),
         });
-        if (!response.ok) throw new Error('Erreur réseau');
+        if (!res1.ok) throw new Error("Erreur envoi candidature");
 
-        resultElem.textContent = "✅ Réponses envoyées, merci d'aller en vocal avec un des membres prévue a cette effet";
+        // Envoi message historique
+        let res2 = await fetch(webhookHistorique, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: historiqueContent }),
+        });
+        if (!res2.ok) throw new Error("Erreur envoi historique");
+
+        resultElem.textContent = "✅ Réponses envoyées avec succès sur Discord !";
         resultElem.classList.remove("error");
         e.target.reset();
       } catch (err) {
         resultElem.textContent = "❌ Une erreur s'est produite lors de l'envoi.";
         resultElem.classList.add("error");
+        console.error(err);
       }
     });
   </script>
