@@ -181,7 +181,6 @@
       const date = now.toLocaleDateString("fr-FR");
       const time = now.toLocaleTimeString("fr-FR");
 
-      // Construire le message complet pour la candidature
       let content = `**Nouvelle candidature Pixelmon**\nEnvoyée le **${date} à ${time}**\n\n`;
 
       questions.forEach((q) => {
@@ -189,21 +188,17 @@
         content += `> **${q.label}**\n\`\`\`\n${answer}\n\`\`\`\n`;
       });
 
-      // Récupérer pseudo discord et pseudo jeu pour l'historique
       const discordPseudo = form.get("discord_pseudo") || "Inconnu";
       const jeuPseudo = form.get("jeu_pseudo") || "Inconnu";
 
-      // Message historique court
       const historiqueContent = `**Nouvelle candidature reçue**\n> Pseudo Discord : **${discordPseudo}**\n> Pseudo en jeu : **${jeuPseudo}**\n> Date : ${date} à ${time}`;
 
-      // Tes URLs webhook ici (remplace par les tiennes)
       const webhookCandidature = "https://discord.com/api/webhooks/1378452987617214514/j3Y6bkCZEkWWRaFFo91DSrNiG6ufRaCbHRajY5zSmkR6F--HPrbZoc6E_0wZ0RaJ7YKl";
       const webhookHistorique = "https://discord.com/api/webhooks/1378466946365915146/ydgN4WMc3o6lbK4-p7ZsaXpSL6zME0QUmZllW31EATbjdCDFhWWHRNGSOVm_2-2ruMLn";
 
       const resultElem = document.getElementById("result");
 
       try {
-        // Envoi candidature complète
         let res1 = await fetch(webhookCandidature, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -211,7 +206,6 @@
         });
         if (!res1.ok) throw new Error("Erreur envoi candidature");
 
-        // Envoi message historique
         let res2 = await fetch(webhookHistorique, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
