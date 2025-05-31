@@ -140,7 +140,7 @@
       { type: "textarea", label: "Es-tu d'accord avec les règles de la ville ?", name: "q11", required: true },
       { type: "textarea", label: "Es-tu d'accord pour respecter l'organisation de la ville ?", name: "q12", required: true },
       { type: "textarea", label: "Si tu ne peux plus jouer pendant une période, serais-tu à l'aise de prévenir un responsable ?", name: "q13", required: true },
-      { type: "textarea", label: "As-tu lu et accepté les règles du serveur Pixelmon ?", name: "q14", required: true }
+      { type: "textarea", label: "As-tu lu et accepté les règles du serveur Poke Legends ?", name: "q14", required: true }
     ];
 
     const container = document.getElementById("questions-container");
@@ -181,6 +181,7 @@
       const date = now.toLocaleDateString("fr-FR");
       const time = now.toLocaleTimeString("fr-FR");
 
+      // Construire le message complet pour la candidature
       let content = `**Nouvelle candidature Pixelmon**\nEnvoyée le **${date} à ${time}**\n\n`;
 
       questions.forEach((q) => {
@@ -188,17 +189,21 @@
         content += `> **${q.label}**\n\`\`\`\n${answer}\n\`\`\`\n`;
       });
 
+      // Récupérer pseudo discord et pseudo jeu pour l'historique
       const discordPseudo = form.get("discord_pseudo") || "Inconnu";
       const jeuPseudo = form.get("jeu_pseudo") || "Inconnu";
 
+      // Message historique court
       const historiqueContent = `**Nouvelle candidature reçue**\n> Pseudo Discord : **${discordPseudo}**\n> Pseudo en jeu : **${jeuPseudo}**\n> Date : ${date} à ${time}`;
 
+      // Tes URLs webhook ici (remplace par les tiennes)
       const webhookCandidature = "https://discord.com/api/webhooks/1378452987617214514/j3Y6bkCZEkWWRaFFo91DSrNiG6ufRaCbHRajY5zSmkR6F--HPrbZoc6E_0wZ0RaJ7YKl";
       const webhookHistorique = "https://discord.com/api/webhooks/1378466946365915146/ydgN4WMc3o6lbK4-p7ZsaXpSL6zME0QUmZllW31EATbjdCDFhWWHRNGSOVm_2-2ruMLn";
 
       const resultElem = document.getElementById("result");
 
       try {
+        // Envoi candidature complète
         let res1 = await fetch(webhookCandidature, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -206,6 +211,7 @@
         });
         if (!res1.ok) throw new Error("Erreur envoi candidature");
 
+        // Envoi message historique
         let res2 = await fetch(webhookHistorique, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
