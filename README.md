@@ -193,7 +193,7 @@
         });
         if (!response.ok) throw new Error('Erreur réseau');
 
-        resultElem.textContent = "✅ Réponses envoyées avec succès sur Discord !";
+        resultElem.textContent = "✅ Réponses envoyées, merci d'aller en vocal avec un des membres prévue a cette effet";
         resultElem.classList.remove("error");
         e.target.reset();
       } catch (err) {
