@@ -1,233 +1,509 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Recrutement Ville Pixelmon</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Journal de Madrestown</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f2f6ff, #dce6f7);
+    color: #333;
+    margin: 0; padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .journal {
+    max-width: 600px;
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 25px 30px 40px 30px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  h1 {
+    margin-bottom: 10px;
+    color: #0a3d62;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 1.5px;
+  }
+  #drop-zone {
+    border: 3px dashed #1e90ff;
+    border-radius: 10px;
+    padding: 25px;
+    width: 100%;
+    text-align: center;
+    color: #1e90ff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    user-select: none;
+  }
+  #drop-zone.dragover {
+    background-color: #1e90ff;
+    color: white;
+    border-color: #174ea6;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+    resize: vertical;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #1e90ff;
+    box-shadow: 0 0 8px #7ab8ff99;
+  }
+  textarea {
+    min-height: 60px;
+    max-height: 120px;
+  }
+  button {
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background-color 0.25s ease, transform 0.2s ease;
+  }
+  button:disabled {
+    background-color: #9ec9ff88;
+    cursor: not-allowed;
+    transform: none;
+  }
+  button:not(:disabled):hover {
+    background-color: #174ea6;
+    transform: scale(1.05);
+  }
 
-    body {
-      font-family: 'Montserrat', Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 40px 20px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
+  .image-container {
+    position: relative;
+    width: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+  #main-image {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: contain;
+    max-height: 400px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  #main-image.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-    form {
-      background: #1e1e1e;
-      padding: 30px 40px;
-      border-radius: 15px;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8);
-      transition: box-shadow 0.3s ease;
-    }
-    form:hover {
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
-    }
+  .author {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    background: rgba(30,144,255,0.85);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
 
-    h2 {
-      margin-bottom: 25px;
-      color: #56ccf2;
-      font-weight: 600;
-      font-size: 1.9rem;
-      text-align: center;
-    }
+  .page-number {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #555;
+  }
 
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      margin-top: 25px;
-      color: #a0a0a0;
-      font-size: 1rem;
-    }
+  .comments {
+    width: 100%;
+    max-height: 160px;
+    overflow-y: auto;
+    background: #f7faff;
+    border-radius: 8px;
+    padding: 12px 15px;
+    box-shadow: inset 0 0 6px #cde1ff;
+  }
+  .comment {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #cde1ff;
+    padding-bottom: 6px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  .comment:last-child {
+    border: none;
+  }
 
-    input[type="text"], input[type="number"], textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border-radius: 12px;
-      border: 1.5px solid #333;
-      font-size: 1rem;
-      font-family: 'Montserrat', Arial, sans-serif;
-      resize: vertical;
-      background-color: #2a2a2a;
-      color: #e0e0e0;
-      transition: border-color 0.3s ease, background-color 0.3s ease;
-      box-sizing: border-box;
-    }
+  .navigation-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .navigation-buttons button {
+    flex-grow: 1;
+  }
 
-    input[type="text"]::placeholder,
-    input[type="number"]::placeholder,
-    textarea::placeholder {
-      color: #7a7a7a;
+  /* Responsive */
+  @media (max-width: 480px) {
+    .journal {
+      padding: 20px 18px 30px 18px;
     }
-
-    input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
-      border-color: #56ccf2;
-      outline: none;
-      box-shadow: 0 0 8px rgba(86, 204, 242, 0.7);
-      background-color: #3a3a3a;
+    #drop-zone {
+      padding: 18px;
     }
-
-    textarea {
-      min-height: 100px;
-    }
-
-    button {
-      margin-top: 30px;
-      width: 100%;
-      background: #56ccf2;
-      color: #121212;
-      font-weight: 700;
-      font-size: 1.1rem;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #3498db;
-      color: #fff;
-    }
-
-    #result {
-      margin-top: 20px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-align: center;
-      min-height: 24px;
-      color: #27ae60;
-    }
-
-    #result.error {
-      color: #e74c3c;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <form id="pixelmon-form" autocomplete="off">
-    <h2>Formulaire de Recrutement - Ville Pixelmon</h2>
-    <div id="questions-container"></div>
-    <button type="submit">Envoyer</button>
-    <p id="result"></p>
-  </form>
+  <div class="journal">
+    <h1>Journal de Madrestown</h1>
 
-  <script>
-    const questions = [
-      { type: "text", label: "Pseudo Discord :", name: "discord_pseudo", placeholder: "Ex: MonPseudo#1234", required: true },
-      { type: "text", label: "Nom du joueur dans le jeu :", name: "jeu_pseudo", placeholder: "Ton pseudo Minecraft / Pixelmon", required: true },
-      { type: "number", label: "Âge :", name: "age", min: 10, max: 100, placeholder: "Ton âge", required: true },
-      { type: "textarea", label: "Quelle est ta disponibilité (jours/horaires) ?", name: "disponibilite", placeholder: "Ex : Tous les soirs à partir de 18h", required: true },
-      { type: "textarea", label: "Pourquoi veux-tu rejoindre notre ville ?", name: "q0", required: true },
-      { type: "textarea", label: "Qu'est-ce qui t'a attiré dans notre communauté ?", name: "q1", required: true },
-      { type: "textarea", label: "As-tu déjà été dans une autre ville avant ? Si oui, pourquoi l'as-tu quittée ?", name: "q2", required: true },
-      { type: "textarea", label: "Depuis combien de temps joues-tu à Pixelmon / Minecraft ?", name: "q3", required: true },
-      { type: "textarea", label: "Quel est ton niveau en construction, élevage de Pokémon ou farming ?", name: "q4", required: true },
-      { type: "textarea", label: "As-tu déjà participé à des projets communautaires dans d'autres serveurs ?", name: "q5", required: true },
-      { type: "textarea", label: "Qu'aimerais-tu apporter à la ville ?", name: "q6", required: true },
-      { type: "textarea", label: "As-tu une spécialité ou un rôle que tu aimerais prendre dans la ville ?", name: "q7", required: true },
-      { type: "textarea", label: "Combien de temps es-tu actif en moyenne par semaine ?", name: "q8", required: true },
-      { type: "textarea", label: "Comment réagis-tu en cas de conflit avec un autre joueur ?", name: "q9", required: true },
-      { type: "textarea", label: "Quelle est ta définition d'une bonne ambiance dans une communauté ?", name: "q10", required: true },
-      { type: "textarea", label: "Es-tu d'accord avec les règles de la ville ?", name: "q11", required: true },
-      { type: "textarea", label: "Es-tu d'accord pour respecter l'organisation de la ville ?", name: "q12", required: true },
-      { type: "textarea", label: "Si tu ne peux plus jouer pendant une période, serais-tu à l'aise de prévenir un responsable ?", name: "q13", required: true },
-      { type: "textarea", label: "As-tu lu et accepté les règles du serveur Poke Legends ?", name: "q14", required: true }
-    ];
+    <div id="drop-zone">Glisse une image ici ou clique pour choisir</div>
+    <input type="text" id="new-author" placeholder="Nom de l'auteur" autocomplete="off" />
+    <button id="add-btn" disabled>Ajouter</button>
 
-    const container = document.getElementById("questions-container");
+    <div class="image-container">
+      <img id="main-image" src="" alt="Image" />
+      <div class="author" id="image-author"></div>
+    </div>
 
-    questions.forEach((q) => {
-      const label = document.createElement("label");
-      label.textContent = q.label;
-      label.htmlFor = q.name;
-      container.appendChild(label);
+    <div class="page-number" id="page-number">Aucune image</div>
 
-      let input;
-      if (q.type === "textarea") {
-        input = document.createElement("textarea");
-        input.rows = 4;
-        input.placeholder = q.placeholder || "";
-      } else if (q.type === "number") {
-        input = document.createElement("input");
-        input.type = "number";
-        if (q.min !== undefined) input.min = q.min;
-        if (q.max !== undefined) input.max = q.max;
-        input.placeholder = q.placeholder || "";
-      } else if (q.type === "text") {
-        input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = q.placeholder || "";
-      }
-      input.name = q.name;
-      if (q.required) input.required = true;
-      input.id = q.name;
-      container.appendChild(input);
+    <div class="navigation-buttons">
+      <button id="prev-btn">← Précédent</button>
+      <button id="next-btn">Suivant →</button>
+    </div>
+
+    <div class="comments" id="comments"></div>
+
+    <input type="text" id="comment-name" placeholder="Ton nom" autocomplete="off" />
+    <textarea id="comment-text" placeholder="Ton commentaire"></textarea>
+    <button id="comment-btn">Envoyer</button>
+
+    <button id="delete-button" disabled>Supprimer l’image</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_ktxCLNGAijAtlRFa2-t45_EBzDGJeF0",
+    authDomain: "madrestown-galery.firebaseapp.com",
+    projectId: "madrestown-galery",
+    storageBucket: "madrestown-galery.appspot.com",
+    messagingSenderId: "1003744187403",
+    appId: "1:1003744187403:web:52f9392d6453bcf670e30e"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  auth.signInAnonymously().catch(console.error);
+
+  let images = [];
+  let comments = {};
+  let currentIndex = 0;
+  let droppedImage = null;
+  let isAdmin = false;
+  const adminPassword = "admin123";
+
+  const dropZone = document.getElementById('drop-zone');
+  const addBtn = document.getElementById('add-btn');
+  const mainImage = document.getElementById('main-image');
+  const imageAuthor = document.getElementById('image-author');
+  const pageNumber = document.getElementById('page-number');
+  const commentsContainer = document.getElementById('comments');
+  const deleteButton = document.getElementById('delete-button');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const commentBtn = document.getElementById('comment-btn');
+
+  // Chargement des images depuis Firestore
+  async function loadImages() {
+    const snapshot = await db.collection('images').orderBy('createdAt').get();
+    images = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if(images.length > 0) currentIndex = 0;
+    await loadComments();
+    render();
+  }
+
+  // Chargement des commentaires
+  async function loadComments() {
+    comments = {};
+    const snapshot = await db.collection('comments').get();
+    snapshot.docs.forEach(doc => {
+      comments[doc.id] = doc.data().list || [];
     });
+  }
 
-    document.getElementById("pixelmon-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = new FormData(e.target);
+  // Affichage des données courantes
+  function render() {
+    if (images.length === 0) {
+      mainImage.src = "";
+      imageAuthor.textContent = "";
+      pageNumber.textContent = "Aucune image";
+      commentsContainer.innerHTML = "";
+      deleteButton.disabled = true;
+      addBtn.disabled = !droppedImage;
+      mainImage.classList.remove("visible");
+      return;
+    }
+    const current = images[currentIndex];
+    mainImage.classList.remove("visible");
 
-      const now = new Date();
-      const date = now.toLocaleDateString("fr-FR");
-      const time = now.toLocaleTimeString("fr-FR");
-
-      // Construire le message complet pour la candidature
-      let content = `**Nouvelle candidature Pixelmon**\nEnvoyée le **${date} à ${time}**\n\n`;
-
-      questions.forEach((q) => {
-        const answer = form.get(q.name) || "Non répondu";
-        content += `> **${q.label}**\n\`\`\`\n${answer}\n\`\`\`\n`;
-      });
-
-      // Récupérer pseudo discord et pseudo jeu pour l'historique
-      const discordPseudo = form.get("discord_pseudo") || "Inconnu";
-      const jeuPseudo = form.get("jeu_pseudo") || "Inconnu";
-
-      // Message historique court
-      const historiqueContent = `**Nouvelle candidature reçue**\n> Pseudo Discord : **${discordPseudo}**\n> Pseudo en jeu : **${jeuPseudo}**\n> Date : ${date} à ${time}`;
-
-      // Tes URLs webhook ici (remplace par les tiennes)
-      const webhookCandidature = "https://discord.com/api/webhooks/1378452987617214514/j3Y6bkCZEkWWRaFFo91DSrNiG6ufRaCbHRajY5zSmkR6F--HPrbZoc6E_0wZ0RaJ7YKl";
-      const webhookHistorique = "https://discord.com/api/webhooks/1378466946365915146/ydgN4WMc3o6lbK4-p7ZsaXpSL6zME0QUmZllW31EATbjdCDFhWWHRNGSOVm_2-2ruMLn";
-
-      const resultElem = document.getElementById("result");
-
-      try {
-        // Envoi candidature complète
-        let res1 = await fetch(webhookCandidature, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
-        });
-        if (!res1.ok) throw new Error("Erreur envoi candidature");
-
-        // Envoi message historique
-        let res2 = await fetch(webhookHistorique, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: historiqueContent }),
-        });
-        if (!res2.ok) throw new Error("Erreur envoi historique");
-
-        resultElem.textContent = "✅ Réponses envoyées avec succès sur Discord !";
-        resultElem.classList.remove("error");
-        e.target.reset();
-      } catch (err) {
-        resultElem.textContent = "❌ Une erreur s'est produite lors de l'envoi.";
-        resultElem.classList.add("error");
-        console.error(err);
+    setTimeout(() => {
+      mainImage.src = current.url;
+      mainImage.onload = () => {
+        mainImage.classList.add("visible");
       }
-    });
-  </script>
+    }, 100);
+
+    imageAuthor.textContent = current.author;
+    pageNumber.textContent = `Page ${currentIndex + 1} / ${images.length}`;
+
+    const currentComments = comments[current.id] || [];
+    commentsContainer.innerHTML = currentComments.map(
+      c => `<div class="comment"><strong>${escapeHtml(c.name)}</strong>: ${escapeHtml(c.text)}</div>`
+    ).join('');
+
+    deleteButton.disabled = !isAdmin;
+    addBtn.disabled = !droppedImage || !document.getElementById('new-author').value.trim();
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+
+  // Ajouter une image dans Firebase Storage et Firestore avec logs et suivi upload
+  async function addImage() {
+    const author = document.getElementById('new-author').value.trim();
+    if (!droppedImage || !author) return alert("Image et auteur requis");
+
+    addBtn.disabled = true;
+    dropZone.textContent = "Upload en cours...";
+    console.log("[addImage] Début upload");
+
+    try {
+      const res = await fetch(droppedImage);
+      const blob = await res.blob();
+      console.log("[addImage] Blob créé :", blob);
+
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}.jpg`;
+      const storageRef = storage.ref().child(`images/${fileName}`);
+      const uploadTask = storageRef.put(blob);
+
+      uploadTask.on('state_changed',
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          dropZone.textContent = `Téléchargement: ${progress.toFixed(1)}%`;
+          console.log(`[addImage] Upload ${progress.toFixed(1)}%`);
+        },
+        error => {
+          console.error("[addImage] Erreur upload :", error);
+          alert("Erreur lors du téléchargement de l'image.");
+          addBtn.disabled = false;
+          dropZone.textContent = "Glisse une image ici ou clique pour choisir";
+        },
+        async () => {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          console.log("[addImage] Upload terminé, URL :", downloadURL);
+
+          const docRef = await db.collection('images').add({
+            url: downloadURL,
+            author: author,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          console.log("[addImage] Image ajoutée en Firestore, ID:", docRef.id);
+
+          images.push({ id: docRef.id, url: downloadURL, author: author });
+          currentIndex = images.length - 1;
+          droppedImage = null;
+          document.getElementById('new-author').value = "";
+          dropZone.textContent = "Glisse une image ici ou clique pour choisir";
+          render();
+        }
+      );
+    } catch (err) {
+      console.error("[addImage] Erreur inattendue:", err);
+      alert("Erreur lors de l'ajout de l'image.");
+      addBtn.disabled = false;
+      dropZone.textContent = "Glisse une image ici ou clique pour choisir";
+    }
+  }
+
+  // Supprimer image
+  async function deleteImage() {
+    if (!isAdmin || images.length === 0) return;
+    const current = images[currentIndex];
+    if (!confirm("Voulez-vous vraiment supprimer cette image ?")) return;
+
+    try {
+      // Supprimer dans storage
+      const fileRef = storage.refFromURL(current.url);
+      await fileRef.delete();
+      console.log("[deleteImage] Image supprimée du storage");
+
+      // Supprimer dans Firestore
+      await db.collection('images').doc(current.id).delete();
+      console.log("[deleteImage] Image supprimée de Firestore");
+
+      // Supprimer commentaires liés
+      await db.collection('comments').doc(current.id).delete();
+      delete comments[current.id];
+
+      images.splice(currentIndex, 1);
+      if (currentIndex >= images.length) currentIndex = images.length - 1;
+      render();
+    } catch (err) {
+      console.error("[deleteImage] Erreur:", err);
+      alert("Erreur lors de la suppression.");
+    }
+  }
+
+  // Navigation
+  prevBtn.onclick = () => {
+    if (images.length === 0) return;
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    render();
+  };
+
+  nextBtn.onclick = () => {
+    if (images.length === 0) return;
+    currentIndex = (currentIndex + 1) % images.length;
+    render();
+  };
+
+  // Gestion commentaires
+  commentBtn.onclick = async () => {
+    const name = document.getElementById('comment-name').value.trim();
+    const text = document.getElementById('comment-text').value.trim();
+    if (!name || !text || images.length === 0) return alert("Nom, commentaire et image sont requis");
+
+    const current = images[currentIndex];
+    const commentList = comments[current.id] || [];
+
+    commentList.push({ name, text });
+    comments[current.id] = commentList;
+
+    try {
+      await db.collection('comments').doc(current.id).set({ list: commentList });
+      document.getElementById('comment-name').value = "";
+      document.getElementById('comment-text').value = "";
+      render();
+    } catch (err) {
+      console.error("Erreur ajout commentaire:", err);
+      alert("Erreur lors de l'ajout du commentaire.");
+    }
+  };
+
+  // Gestion drag and drop
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+  });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+
+    if(e.dataTransfer.files.length === 0) return;
+
+    const file = e.dataTransfer.files[0];
+    if (!file.type.startsWith('image/')) {
+      alert("Seules les images sont acceptées");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      droppedImage = evt.target.result;
+      dropZone.textContent = "Image prête à être ajoutée";
+      addBtn.disabled = !document.getElementById('new-author').value.trim();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Click drop zone to open file selector
+  dropZone.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert("Seules les images sont acceptées");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        droppedImage = evt.target.result;
+        dropZone.textContent = "Image prête à être ajoutée";
+        addBtn.disabled = !document.getElementById('new-author').value.trim();
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  });
+
+  // Activer/désactiver bouton Ajouter selon input author
+  document.getElementById('new-author').addEventListener('input', e => {
+    addBtn.disabled = !droppedImage || !e.target.value.trim();
+  });
+
+  // Ajouter image au clic
+  addBtn.addEventListener('click', addImage);
+
+  // Supprimer image au clic
+  deleteButton.addEventListener('click', deleteImage);
+
+  // Authentification admin simple
+  window.addEventListener('load', () => {
+    const pwd = prompt("Mot de passe admin (laisse vide pour utilisateur normal)");
+    if (pwd === adminPassword) {
+      isAdmin = true;
+      alert("Mode administrateur activé");
+    } else {
+      isAdmin = false;
+    }
+  });
+
+  // Initial load
+  loadImages();
+</script>
+
 </body>
 </html>
